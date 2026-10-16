@@ -1,0 +1,67 @@
+[
+  {
+    "municipality_id": "thess_kalamaria",
+    "nuts3": "EL522",
+    "name_el": "Δήμος Καλαμαριάς",
+    "name_en": "Kalamaria",
+    "parent_region": "Thessaloniki",
+    "turnover_tier": "metro_suburban_premium",
+    "margin_offset_eur": 0.065,
+    "station_count": 18,
+    "typical_lag_up": 2.0,
+    "typical_lag_down": 8.5,
+    "context": "Affluent southeastern coastal suburb; dominated by refiner COCO networks (Ermis/Shell, Kalypso/BP/EKO) dispensing additive-enhanced 95 (Kinitron, FuelSave, Best 95) with coordinated pegging at €2.147/L."
+  },
+  {
+    "municipality_id": "thess_centre",
+    "nuts3": "EL522",
+    "name_el": "Δήμος Θεσσαλονίκης",
+    "name_en": "Thessaloniki Centre",
+    "parent_region": "Thessaloniki",
+    "turnover_tier": "metro_high",
+    "margin_offset_eur": 0.025,
+    "station_count": 42,
+    "typical_lag_up": 2.0,
+    "typical_lag_down": 7.5,
+    "context": "Dense urban core; high throughput, moderate price competition."
+  },
+  {
+    "municipality_id": "thess_west_kalochori",
+    "nuts3": "EL522",
+    "name_el": "Δήμος Δέλτα (Καλοχώρι / Σίνδος)",
+    "name_en": "Kalochori / West Industrial",
+    "parent_region": "Thessaloniki",
+    "turnover_tier": "metro_industrial_discount",
+    "margin_offset_eur": -0.035,
+    "station_count": 26,
+    "typical_lag_up": 1.5,
+    "typical_lag_down": 6.5,
+    "context": "Direct refinery depot proximity (Kalochori fuel terminals), heavy fleet logistics traffic, aggressive independent discounters."
+  },
+  {
+    "municipality_id": "attica_glyfada",
+    "nuts3": "EL303",
+    "name_el": "Δήμος Γλυφάδας",
+    "name_en": "Glyfada",
+    "parent_region": "South Athens",
+    "turnover_tier": "metro_suburban_premium",
+    "margin_offset_eur": 0.070,
+    "station_count": 22,
+    "typical_lag_up": 2.0,
+    "typical_lag_down": 9.0,
+    "context": "Southern coastal Athens; premium station amenities, higher retail margin floor."
+  },
+  {
+    "municipality_id": "attica_kifisia",
+    "nuts3": "EL301",
+    "name_el": "Δήμος Κηφισιάς",
+    "name_en": "Kifisia",
+    "parent_region": "North Athens",
+    "turnover_tier": "metro_suburban_premium",
+    "margin_offset_eur": 0.068,
+    "station_count": 19,
+    "typical_lag_up": 2.0,
+    "typical_lag_down": 9.0,
+    "context": "Northern Athens suburb; premium multi-fuel stations."
+  }
+]

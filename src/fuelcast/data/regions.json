@@ -1,0 +1,122 @@
+[
+  {
+    "nuts3": "EL301",
+    "name_el": "Κεντρικός Τομέας Αθηνών",
+    "name_en": "Central Athens",
+    "turnover_tier": "metro_high",
+    "lag_up": 2.0,
+    "lag_down": 7.0
+  },
+  {
+    "nuts3": "EL303",
+    "name_el": "Νότιος Τομέας Αθηνών",
+    "name_en": "South Athens",
+    "turnover_tier": "metro_high",
+    "lag_up": 2.0,
+    "lag_down": 7.0
+  },
+  {
+    "nuts3": "EL305",
+    "name_el": "Ανατολική Αττική",
+    "name_en": "East Attica",
+    "turnover_tier": "metro_high",
+    "lag_up": 2.5,
+    "lag_down": 8.0
+  },
+  {
+    "nuts3": "EL522",
+    "name_el": "Θεσσαλονίκη",
+    "name_en": "Thessaloniki",
+    "turnover_tier": "metro_high",
+    "lag_up": 2.0,
+    "lag_down": 7.5
+  },
+  {
+    "nuts3": "EL511",
+    "name_el": "Ημαθία",
+    "name_en": "Imathia",
+    "turnover_tier": "mainland_standard",
+    "lag_up": 3.0,
+    "lag_down": 10.0
+  },
+  {
+    "nuts3": "EL611",
+    "name_el": "Καρδίτσα",
+    "name_en": "Karditsa",
+    "turnover_tier": "mainland_standard",
+    "lag_up": 3.0,
+    "lag_down": 10.0
+  },
+  {
+    "nuts3": "EL612",
+    "name_el": "Λάρισα",
+    "name_en": "Larissa",
+    "turnover_tier": "mainland_standard",
+    "lag_up": 3.0,
+    "lag_down": 9.5
+  },
+  {
+    "nuts3": "EL631",
+    "name_el": "Αιτωλοακαρνανία",
+    "name_en": "Aetolia-Acarnania",
+    "turnover_tier": "mainland_standard",
+    "lag_up": 3.5,
+    "lag_down": 10.5
+  },
+  {
+    "nuts3": "EL632",
+    "name_el": "Αχαΐα",
+    "name_en": "Achaia (Patras)",
+    "turnover_tier": "mainland_standard",
+    "lag_up": 2.5,
+    "lag_down": 8.5
+  },
+  {
+    "nuts3": "EL422",
+    "name_el": "Κυκλάδες",
+    "name_en": "Cyclades",
+    "turnover_tier": "island_remote",
+    "lag_up": 4.5,
+    "lag_down": 14.0
+  },
+  {
+    "nuts3": "EL421",
+    "name_el": "Δωδεκάνησα",
+    "name_en": "Dodecanese",
+    "turnover_tier": "island_remote",
+    "lag_up": 4.5,
+    "lag_down": 14.0
+  },
+  {
+    "nuts3": "EL621",
+    "name_el": "Ζάκυνθος",
+    "name_en": "Zakynthos",
+    "turnover_tier": "island_remote",
+    "lag_up": 4.0,
+    "lag_down": 12.0
+  },
+  {
+    "nuts3": "EL622",
+    "name_el": "Κέρκυρα",
+    "name_en": "Corfu",
+    "turnover_tier": "island_remote",
+    "lag_up": 3.5,
+    "lag_down": 11.5
+  },
+  {
+    "nuts3": "EL431",
+    "name_el": "Ηράκλειο",
+    "name_en": "Heraklion",
+    "turnover_tier": "mainland_standard",
+    "lag_up": 3.0,
+    "lag_down": 9.0
+  },
+  {
+    "nuts3": "EL434",
+    "name_el": "Χανιά",
+    "name_en": "Chania",
+    "turnover_tier": "mainland_standard",
+    "lag_up": 3.0,
+    "lag_down": 9.0
+  }
+]
