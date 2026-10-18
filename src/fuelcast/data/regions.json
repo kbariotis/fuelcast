@@ -1,6 +1,6 @@
 [
   {
-    "nuts3": "EL301",
+    "nuts3": "EL303",
     "name_el": "Κεντρικός Τομέας Αθηνών",
     "name_en": "Central Athens",
     "turnover_tier": "metro_high",
@@ -8,12 +8,28 @@
     "lag_down": 7.0
   },
   {
-    "nuts3": "EL303",
+    "nuts3": "EL304",
     "name_el": "Νότιος Τομέας Αθηνών",
     "name_en": "South Athens",
     "turnover_tier": "metro_high",
     "lag_up": 2.0,
-    "lag_down": 7.0
+    "lag_down": 7.5
+  },
+  {
+    "nuts3": "EL301",
+    "name_el": "Βόρειος Τομέας Αθηνών",
+    "name_en": "North Athens",
+    "turnover_tier": "metro_high",
+    "lag_up": 2.0,
+    "lag_down": 7.5
+  },
+  {
+    "nuts3": "EL302",
+    "name_el": "Δυτικός Τομέας Αθηνών",
+    "name_en": "West Athens",
+    "turnover_tier": "metro_high",
+    "lag_up": 1.8,
+    "lag_down": 6.8
   },
   {
     "nuts3": "EL305",
@@ -24,6 +40,14 @@
     "lag_down": 8.0
   },
   {
+    "nuts3": "EL306",
+    "name_el": "Δυτική Αττική (Ασπρόπυργος / Ελευσίνα)",
+    "name_en": "West Attica (Refinery Hub)",
+    "turnover_tier": "metro_high",
+    "lag_up": 1.5,
+    "lag_down": 6.5
+  },
+  {
     "nuts3": "EL522",
     "name_el": "Θεσσαλονίκη",
     "name_en": "Thessaloniki",
@@ -32,12 +56,12 @@
     "lag_down": 7.5
   },
   {
-    "nuts3": "EL511",
+    "nuts3": "EL521",
     "name_el": "Ημαθία",
     "name_en": "Imathia",
     "turnover_tier": "mainland_standard",
     "lag_up": 3.0,
-    "lag_down": 10.0
+    "lag_down": 9.5
   },
   {
     "nuts3": "EL611",

@@ -8,8 +8,7 @@ CREATE TABLE IF NOT EXISTS regions (
     nuts2_code VARCHAR(10) NOT NULL,            -- e.g., EL30 (Attica), EL52 (Central Macedonia)
     nuts3_code VARCHAR(10) NOT NULL,            -- Prefecture level (Perifereiaki Enotita)
     name_el VARCHAR(100) NOT NULL,
-    name_en VARCHAR(100) NOT NULL,
-    turnover_tier VARCHAR(20) NOT NULL CHECK (turnover_tier IN ('metro_high', 'mainland_standard', 'island_remote')),
+    turnover_tier VARCHAR(30) NOT NULL CHECK (turnover_tier IN ('metro_high', 'metro_suburban_premium', 'metro_industrial_discount', 'mainland_standard', 'island_remote')),
     typical_lag_days_up NUMERIC(3,1) DEFAULT 2.0,
     typical_lag_days_down NUMERIC(3,1) DEFAULT 10.0,
     created_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP

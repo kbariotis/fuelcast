@@ -10,7 +10,7 @@
     "station_count": 18,
     "typical_lag_up": 2.0,
     "typical_lag_down": 8.5,
-    "context": "Affluent southeastern coastal suburb; dominated by refiner COCO networks (Ermis/Shell, Kalypso/BP/EKO) dispensing additive-enhanced 95 (Kinitron, FuelSave, Best 95) with coordinated pegging at €2.147/L."
+    "context": "Affluent southeastern coastal suburb; dominated by refiner COCO networks (Ermis/Shell, Kalypso/BP/EKO) dispensing additive-enhanced 95 with coordinated pegging at retail premium."
   },
   {
     "municipality_id": "thess_centre",
@@ -23,7 +23,7 @@
     "station_count": 42,
     "typical_lag_up": 2.0,
     "typical_lag_down": 7.5,
-    "context": "Dense urban core; high throughput, moderate price competition."
+    "context": "Dense urban core; high vehicle throughput, intense competitive pressure."
   },
   {
     "municipality_id": "thess_west_kalochori",
@@ -36,11 +36,11 @@
     "station_count": 26,
     "typical_lag_up": 1.5,
     "typical_lag_down": 6.5,
-    "context": "Direct refinery depot proximity (Kalochori fuel terminals), heavy fleet logistics traffic, aggressive independent discounters."
+    "context": "Direct refinery depot proximity (Kalochori fuel terminals), heavy commercial fleet volume, independent price-cutters operating near wholesale rack."
   },
   {
     "municipality_id": "attica_glyfada",
-    "nuts3": "EL303",
+    "nuts3": "EL304",
     "name_el": "Δήμος Γλυφάδας",
     "name_en": "Glyfada",
     "parent_region": "South Athens",
@@ -49,7 +49,7 @@
     "station_count": 22,
     "typical_lag_up": 2.0,
     "typical_lag_down": 9.0,
-    "context": "Southern coastal Athens; premium station amenities, higher retail margin floor."
+    "context": "Southern coastal Athens (Athenian Riviera); high commercial ground leases, premium station amenities, affluent inelastic consumer profile."
   },
   {
     "municipality_id": "attica_kifisia",
@@ -62,6 +62,6 @@
     "station_count": 19,
     "typical_lag_up": 2.0,
     "typical_lag_down": 9.0,
-    "context": "Northern Athens suburb; premium multi-fuel stations."
+    "context": "Northern Athens suburb; high branded concessionaire density along Kifisias arterial axis."
   }
 ]

@@ -5,9 +5,9 @@ import os
 import sys
 from typing import Optional
 
-from .engine import AsymmetricLagEngine, Signal
+from .core import AsymmetricLagEngine, Signal, decompose_pump_price
 from .ingestion import DomesticIngestion, UpstreamIngestion
-from .tax import decompose_pump_price
+from .storage import FuelCastStorage
 
 
 def cmd_ingest_upstream(args):
@@ -29,10 +29,15 @@ def cmd_ingest_upstream(args):
     for q in display_sample:
         print(f"{q.date:<12} | ${q.brent_usd:<14.2f} | {q.eur_usd:<10.4f} | €{q.crude_eur_per_litre:<11.4f}")
 
+    # Persist to embedded SQLite database
+    storage = FuelCastStorage()
+    saved = storage.save_upstream_quotes(quotes)
+    print(f"\n[PERSISTED] {saved} quotes stored in SQLite database ({storage.db_path})")
+
     if args.output:
         with open(args.output, "w", encoding="utf-8") as f:
             json.dump([q.__dict__ for q in quotes], f, indent=2)
-        print(f"\nSaved full timeseries to: {args.output}")
+        print(f"Saved JSON export to: {args.output}")
 
     # Summary analysis
     first, last = quotes[0], quotes[-1]
@@ -44,20 +49,52 @@ def cmd_ingest_upstream(args):
 
 def cmd_ingest_domestic(args):
     """Executes on-demand domestic Greek price observatory ingestion."""
-    print("=" * 75)
+    print("=" * 80)
     print("  FuelCast Greece - Domestic Regional Price Ingestion")
-    print("=" * 75)
+    print("=" * 80)
 
     ingest = DomesticIngestion()
+
+    if args.live:
+        region_target = args.region or "kalamaria"
+        print(f"Connecting to live Greek Fuel Price Observatory mirror for: {region_target.upper()}...")
+        try:
+            snapshot = ingest.fetch_live_market(region_name=region_target, radius_km=args.radius)
+            print(f"\n[LIVE QUERY SUCCESS] Timestamp: {snapshot.query_timestamp}")
+            print(f"Target Center: {snapshot.center_coords} (Radius: {snapshot.radius_km} km)")
+            print(f"Total Stations Observed: {snapshot.total_stations_found} | Fresh: {snapshot.fresh_stations_count} | Stale: {snapshot.stale_stations_count}")
+            print(f"Price Metrics: Mean €{snapshot.mean_price:.3f} | Mode €{snapshot.modal_price:.3f} | Range: €{snapshot.min_price:.3f} - €{snapshot.max_price:.3f}")
+            print(f"Derived Empirical Spatial Margin (ex-VAT): €{snapshot.derived_spatial_margin_ex_vat:.4f}/L\n")
+            
+            print("-" * 80)
+            print(f"{'Brand':<10} | {'Price (€/L)':<12} | {'Reported At':<19} | {'Address'}")
+            print("-" * 80)
+            for st in snapshot.stations[:15]:
+                stale_tag = " (STALE)" if st.is_stale else ""
+                print(f"{st.brand:<10} | €{st.price:<11.3f} | {st.reported_at:<19} | {st.address[:34]}{stale_tag}")
+            
+            # Persist live stations to SQLite
+            storage = FuelCastStorage()
+            saved_count = storage.save_station_records(snapshot.stations)
+            print(f"[PERSISTED] {saved_count} station observations stored in SQLite database ({storage.db_path})\n")
+
+            if args.output:
+                with open(args.output, "w", encoding="utf-8") as f:
+                    json.dump(snapshot.__dict__, f, indent=2, default=str, ensure_ascii=False)
+                print(f"Saved live market snapshot JSON to: {args.output}")
+            return
+        except Exception as e:
+            print(f"Live domestic query failed: {e}. Falling back to cached topology.")
+
     snapshots = ingest.run(source_file=args.file)
 
     print(f"\nIngested {len(snapshots)} regional administrative units.")
-    print("-" * 75)
-    print(f"{'NUTS-3':<7} | {'Prefecture (GR)':<20} | {'Tier':<16} | {'Avg (€/L)':<10} | {'Stations'}")
-    print("-" * 75)
+    print("-" * 80)
+    print(f"{'NUTS-3':<7} | {'Prefecture / Dimos (GR)':<26} | {'Tier':<22} | {'Avg (€/L)':<10} | {'Stations'}")
+    print("-" * 80)
 
     for s in snapshots:
-        print(f"{s.nuts3_code:<7} | {s.region_name_el:<20} | {s.turnover_tier:<16} | €{s.avg_price:<9.3f} | {s.sample_station_count}")
+        print(f"{s.nuts3_code:<7} | {s.region_name_el:<26} | {s.turnover_tier:<22} | €{s.avg_price:<9.3f} | {s.sample_station_count}")
 
     if args.output:
         with open(args.output, "w", encoding="utf-8") as f:
@@ -76,6 +113,36 @@ def cmd_forecast(args):
     quotes = up_ingest.run(force_mock=args.mock, days=args.days, trend=args.trend)
     cost_series = [q.crude_eur_per_litre for q in quotes]
 
+    dom_ingest = DomesticIngestion()
+
+    # 2. Check for live domestic query
+    if args.live and args.region:
+        try:
+            live_snap = dom_ingest.fetch_live_market(region_name=args.region)
+            engine = AsymmetricLagEngine()
+            fc = engine.predict_regional_price(
+                current_pump_price=live_snap.modal_price,
+                upstream_eur_series=cost_series,
+                fuel_type="unleaded_95",
+                turnover_tier="metro_suburban_premium" if "kalamaria" in args.region.lower() else "metro_high",
+                horizon_days=args.horizon,
+            )
+            signal_str = {
+                Signal.FILL_NOW: "🔴 FILL NOW",
+                Signal.WAIT: "🟢 WAIT",
+                Signal.STABLE: "🟡 STABLE",
+            }.get(fc.signal, fc.signal.value)
+
+            print(f"\n[LIVE GROUND TRUTH FORECAST: {args.region.upper()}]")
+            print(f"Sample: {live_snap.fresh_stations_count} live stations (Mode: €{live_snap.modal_price:.3f}, Mean: €{live_snap.mean_price:.3f})")
+            print(f"Signal: {signal_str} | Current: €{fc.current_price:.3f} -> Projected: €{fc.predicted_price:.3f} (Δ {fc.expected_delta:+.3f}) | Conf: {fc.confidence_score*100:.0f}%\n")
+            # Persist forecast to SQLite
+            storage = FuelCastStorage()
+            storage.save_forecast(fc, region_code=args.region, fuel_type="unleaded_95")
+            return
+        except Exception as e:
+            print(f"Live forecast query failed: {e}. Falling back to topology baselines.")
+
     # 2. Fetch domestic regional baselines
     dom_ingest = DomesticIngestion()
     snapshots = dom_ingest.run()
@@ -93,6 +160,7 @@ def cmd_forecast(args):
             sys.exit(1)
 
     engine = AsymmetricLagEngine()
+    storage = FuelCastStorage()
 
     print(f"{'Region':<22} | {'Tier':<15} | {'Current':<9} | {'Forecast':<9} | {'Signal':<12} | {'Conf'}")
     print("-" * 80)
@@ -106,6 +174,9 @@ def cmd_forecast(args):
             horizon_days=args.horizon,
         )
 
+        # Persist each forecast
+        storage.save_forecast(fc, region_code=s.nuts3_code, fuel_type="unleaded_95")
+
         signal_str = {
             Signal.FILL_NOW: "🔴 FILL NOW",
             Signal.WAIT: "🟢 WAIT",
@@ -116,6 +187,7 @@ def cmd_forecast(args):
         print(f"{s.region_name_en:<22} | {s.turnover_tier:<15} | €{fc.current_price:<8.3f} | €{fc.predicted_price:<8.3f} ({delta_sign}) | {signal_str:<12} | {fc.confidence_score*100:.0f}%")
 
     print("-" * 80)
+    print(f"Persisted {len(snapshots)} regional forecasts to SQLite database ({storage.db_path})")
     print("Note: Signal threshold requires |Δ| >= €0.008/L to trigger FILL_NOW or WAIT.")
 
 
@@ -146,6 +218,21 @@ def cmd_tax_breakdown(args):
     print("=" * 65)
 
 
+def cmd_db_status(args):
+    """Inspects the local SQLite database state and row counts."""
+    storage = FuelCastStorage()
+    stats = storage.get_db_stats()
+    print("=" * 65)
+    print("  FuelCast Greece - Embedded SQLite Database Status")
+    print("=" * 65)
+    print(f"Database File: {storage.db_path}\n")
+    print(f"{'Table Name':<28} | {'Persisted Rows':<14}")
+    print("-" * 45)
+    for tbl, count in stats.items():
+        print(f"{tbl:<28} | {count:<14}")
+    print("=" * 65)
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog="fuelcast",
@@ -165,12 +252,16 @@ def main():
     dom_p = subparsers.add_parser("ingest-domestic", help="Ingest Greek regional pump price bulletins.")
     dom_p.add_argument("--file", type=str, help="Optional local JSON/bulletin file to parse.")
     dom_p.add_argument("--output", type=str, help="Destination JSON file path.")
+    dom_p.add_argument("--live", action="store_true", help="Execute real-time query against Fuel Price Observatory mirror.")
+    dom_p.add_argument("--region", type=str, default="kalamaria", help="Target region/municipality for live query (default: kalamaria).")
+    dom_p.add_argument("--radius", type=int, default=10, help="Search radius in km for live query (default: 10)")
     dom_p.set_defaults(func=cmd_ingest_domestic)
 
     # Subcommand: forecast
     fc_p = subparsers.add_parser("forecast", help="Run asymmetric price forecast over target horizon.")
     fc_p.add_argument("--horizon", type=int, default=3, help="Forecast horizon in days (default: 3 / 72h)")
     fc_p.add_argument("--region", type=str, help="Optional NUTS-3 code (e.g. EL301, EL422) or name filter.")
+    fc_p.add_argument("--live", action="store_true", help="Fetch live real-time ground truth retail prices for forecast.")
     fc_p.add_argument("--mock", action="store_true", help="Force synthetic upstream inputs.")
     fc_p.add_argument("--trend", choices=["spike", "drop", "stable"], default="spike")
     fc_p.add_argument("--days", type=int, default=30)
@@ -183,9 +274,14 @@ def main():
     tax_p.add_argument("--fuel", choices=["unleaded_95", "unleaded_100", "diesel", "lpg"], default="unleaded_95")
     tax_p.set_defaults(func=cmd_tax_breakdown)
 
+    # Subcommand: db-status
+    db_p = subparsers.add_parser("db-status", help="Inspect local SQLite database status and table metrics.")
+    db_p.set_defaults(func=cmd_db_status)
+
     args = parser.parse_args()
     args.func(args)
 
 
 if __name__ == "__main__":
     main()
+

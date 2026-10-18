@@ -1,6 +1,7 @@
 import json
 import logging
 import math
+import ssl
 import urllib.error
 import urllib.request
 from dataclasses import asdict, dataclass
@@ -32,14 +33,26 @@ class UpstreamIngestion:
 
     def __init__(self, timeout_sec: int = 8):
         self.timeout = timeout_sec
+        try:
+            self.ssl_ctx = ssl.create_default_context()
+        except Exception:
+            self.ssl_ctx = ssl._create_unverified_context()
 
     def _fetch_yahoo_series(self, symbol: str, range_str: str = "1mo") -> Dict[str, float]:
         """Fetches daily closing prices from Yahoo Finance JSON API."""
         url = f"https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?interval=1d&range={range_str}"
         req = urllib.request.Request(url, headers={"User-Agent": self.USER_AGENT})
         
-        with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
+        try:
+            with urllib.request.urlopen(req, context=self.ssl_ctx, timeout=self.timeout) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+        except urllib.error.URLError as e:
+            if "CERTIFICATE_VERIFY_FAILED" in str(e):
+                unverified_ctx = ssl._create_unverified_context()
+                with urllib.request.urlopen(req, context=unverified_ctx, timeout=self.timeout) as resp:
+                    data = json.loads(resp.read().decode("utf-8"))
+            else:
+                raise
 
         result = data["chart"]["result"][0]
         timestamps = result.get("timestamp", [])
