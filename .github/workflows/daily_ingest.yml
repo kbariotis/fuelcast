@@ -2,11 +2,11 @@ name: Daily FuelCast Ingestion & Forecast Engine
 
 on:
   schedule:
-    # 07:45 UTC (10:45 Greek local time): Captures morning Ministry/station price submissions
+    # 07:45 UTC (10:45 EET): Morning Ministry of Development & station price sync
     - cron: '45 7 * * 1-5'
-    # 21:45 UTC: Captures European & NYMEX Brent crude / FX daily close
+    # 21:45 UTC: European & NYMEX Brent crude / FX daily close
     - cron: '45 21 * * 1-5'
-  workflow_dispatch: # Allows manual trigger from GitHub UI
+  workflow_dispatch: # Allows manual one-click trigger from GitHub Actions UI
 
 permissions:
   contents: write
@@ -24,24 +24,23 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Run Upstream & Domestic Ingestion
+      - name: Execute Live Ingestion & Forecasting
         run: |
           chmod +x fuelcast
-          # 1. Pull global market quotes (Brent crude + EUR/USD)
+          # 1. Ingest upstream Brent Crude and EUR/USD FX rates
           ./fuelcast ingest-upstream --days 30
-          # 2. Pull live domestic station pricing for key Greek urban centers
+          # 2. Ingest live ground-truth retail pump stations
           ./fuelcast ingest-domestic --live --region kalamaria --radius 10
           ./fuelcast ingest-domestic --live --region thessaloniki --radius 15
           ./fuelcast ingest-domestic --live --region athens --radius 20
-          # 3. Generate and persist forecasts
+          # 3. Generate regional forecasts and persist signals
           ./fuelcast forecast --horizon 3
-          # 4. Display database metrics
+          # 4. Print database state
           ./fuelcast db-status
 
-      - name: Commit & Persist Database
+      - name: Commit & Push Updated Database
         run: |
-          git config user.name "FuelCast Bot"
-          git config user.email "bot@fuelcast.gr"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add data/fuelcast.db
-          git diff --staged --quiet || git commit -m "chore(data): automated daily fuel market ingestion [skip ci]"
-          git push
+          git diff --staged --quiet || (git commit -m "chore(data): automated daily fuel market ingestion [skip ci]" && git push)
